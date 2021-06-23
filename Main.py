@@ -30,7 +30,7 @@ _ROOTFOLD = os.path.dirname(__file__)
 _PLOT = True
 
 
-### WELCOME MESSAGE ################################################################################
+### WELCOME MESSAGE ###########################################################
 """
 GOODWIN-TYPE RESOLUTION ALGORITHM
 
@@ -65,6 +65,30 @@ WHAT I AM (Paul) LOOKING FOR IN FURTHER DEVELOPMENT
 * The plots are UGLY ! Let's do something nicer
 * As Iloveclim and Dymends are not in python, prepare some bindings
 """
+
+
+# #############################################################################
+# #############################################################################
+#                   Ulities
+# #############################################################################
+
+
+def _str2bool(arg):
+    if isinstance(arg, bool):
+        return arg
+    elif arg.lower() in ['yes', 'true', 'y', 't', '1']:
+        return True
+    elif arg.lower() in ['no', 'false', 'n', 'f', '0']:
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected!')
+
+
+# #############################################################################
+# #############################################################################
+#                   Main function
+# #############################################################################
+
 
 def run(
     plot=None,
@@ -261,7 +285,8 @@ if __name__ ==  '__main__':
     parser.add_argument(
         '-p',
         '--plot',
-        type=bool,
+        type=_str2bool,
+        help='flag indicating whether to plot figures',
         default=_PLOT,
         required=False,
     )
@@ -269,10 +294,11 @@ if __name__ ==  '__main__':
         '-root',
         '--rootfold',
         type=str,
+        help='path where to save data',
         default=_ROOTFOLD,
         required=False,
     )
-    kwdargs = dict(parser.parse_args(sys.argv[2:])._get_kwargs())
+    kwdargs = dict(parser.parse_args()._get_kwargs())
 
     # Call function                                                             
     run(**kwdargs)
