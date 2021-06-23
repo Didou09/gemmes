@@ -8,6 +8,7 @@ The code is importing some other libraries so that we can use their functions.
 
 # Standard library
 import os
+import sys
 import argparse
 
 
@@ -26,6 +27,7 @@ import Miscfunc as M          # All miscellaneous functions
 
 
 _ROOTFOLD = os.path.dirname(__file__)
+_PLOT = True
 
 
 ### WELCOME MESSAGE ################################################################################
@@ -64,14 +66,17 @@ WHAT I AM (Paul) LOOKING FOR IN FURTHER DEVELOPMENT
 * As Iloveclim and Dymends are not in python, prepare some bindings
 """
 
-def run():
+def run(
+    plot=None,
+    rootfold=None,
+):
 
     print('List of existing set of equations  :')
     for f in [ f for f in dir(FG) if 'f_' in f] : print(f)
     print(3*'\n')
 
-    ### PARAMETERS INITIALISATION ######################################################################
-    ####################################################################################################    
+    ### PARAMETERS INITIALISATION #############################################
+    ###########################################################################    
     for _ in range(1):
         """
         This part create 'param' (parameters dic) and 'op' (operators dic) depending of the system size and properties
@@ -88,8 +93,8 @@ def run():
         param = M.preparedT(param)         # Determine the best value for dt and associates
         op= []#M.prepareOperators(p)  # Spatial operators initialisation
 
-    ### initial conditions #############################################################################
-    ####################################################################################################
+    ### initial conditions ####################################################
+    ###########################################################################
     """
     The initial state vector at t=0 of the system in a "readable" language.
     Depending of the equation set you use, all of them will not necessary be used.
@@ -133,8 +138,8 @@ def run():
 
 
     y, param = FG.prepareY(ic, param) ### The vector y containing all the state of a time t.
-    ### Initialisation of data storage #################################################################
-    ####################################################################################################
+    ### Initialisation of data storage ########################################
+    ###########################################################################
     """
     This part is very close to the numerical resolution core. No need to delve in it
     It looks "complex" because it allows the record of few timestep only
@@ -146,8 +151,8 @@ def run():
     tprevious    = 0                                   # deltatime between two records
     idx          = 0                                   # index of the current record
 
-    ### Simulation iteration ############################################################################
-    #####################################################################################################
+    ### Simulation iteration ##################################################
+    ###########################################################################
     """
     The RK4 core, with partial temporal storage
     """
@@ -198,9 +203,9 @@ def run():
 
     print('done ! elapsed time :', time.time()-tim,'s')
 
-    if param['Save'] : FG.savedata(_ROOTFOLD, t, Y_s, param, op) # Save the data as a pickle file in a new folder
-    ### Results interpretation #########################################################################
-    ####################################################################################################
+    if param['Save'] : FG.savedata(rootfold, t, Y_s, param, op) # Save the data as a pickle file in a new folder
+    ### Results interpretation ################################################
+    ###########################################################################
     """
     Now that the simulation is done, we can translate its results in a more readable fashion.
     r is the expansion of Y_s into all the relevant variables we are looking for, stored as a dictionnary.
@@ -211,15 +216,16 @@ def run():
     r = M.getperiods(r, param, op)      # Period measurements 
 
     # GRAPHS, 
-    plts.PhilAndInvest(param,)             # Show behavior functions 
-    plts.GoodwinKeenTypical(r, param,)      # Typical 3-Dimension phase-plot
-    plts.omegalambdacycles(r, param,)       # 2-D omega-lambda phase portrait
-    plts.GraphesIntensive(r, param)
-    plts.GraphesExtensive(r, param)
-    #plts.PhasewithG(r, param, op,)           # Phase diagram with growth
-    plts.PeriodPlots(r, param, op,)          # Study stability-period
-    #plts.map2DLambdaT(r, op,)
-    #plts.MesoMeanSTD(r, param, op,)
+    if plot is True:
+        plts.PhilAndInvest(param,)             # Show behavior functions 
+        plts.GoodwinKeenTypical(r, param,)      # Typical 3-Dimension phase-plot
+        plts.omegalambdacycles(r, param,)       # 2-D omega-lambda phase portrait
+        plts.GraphesIntensive(r, param)
+        plts.GraphesExtensive(r, param)
+        #plts.PhasewithG(r, param, op,)           # Phase diagram with growth
+        plts.PeriodPlots(r, param, op,)          # Study stability-period
+        #plts.map2DLambdaT(r, op,)
+        #plts.MesoMeanSTD(r, param, op,)
 
     return
 
@@ -233,7 +239,28 @@ def run():
 
 if __name__ ==  '__main__':
 
-    # Call function
-    run()
+    # executable help
+    msg = """Thus function does this and that"""
 
+    # Instanciate parser                                                        
+    parser = argparse.ArgumentParser(description=msg)
 
+    # Define input arguments                                                                                 
+    parser.add_argument(
+        '-p',
+        '--plot',
+        type=bool,
+        default=_PLOT,
+        required=False,
+    )
+    parser.add_argument(
+        '-root',
+        '--rootfold',
+        type=str,
+        default=_ROOTFOLD,
+        required=False,
+    )
+    kwdargs = dict(parser.parse_args(sys.argv[2:])._get_kwargs())
+
+    # Call function                                                             
+    run(**kwdargs)
