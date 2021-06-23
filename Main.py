@@ -2,6 +2,23 @@
 # -*- coding: utf-8 -*-
 
 
+"""
+The code is importing some other libraries so that we can use their functions. 
+"""
+# common
+import time                     # Time (run speed) printing
+import numpy as np              # Array/Numerical operations
+import matplotlib.pyplot as plt # Plot elements 
+# plt.close('all')                # Remove to 
+
+
+# gemmes-specific
+import Parameters as Par      # All the parameters of the system
+import FunctionsGoodwin as FG # Core of models
+import plots as plts          # Already written plot functions
+import Miscfunc as M          # All miscellaneous functions
+
+
 #rootfold='/home/ejp/Desktop/Goodwin-Keen/simulations'
 #rootfold='D:\\Georgetown\\Simulation-Goodwin\\'
 rootfold = os.path.dirname(__file__)
@@ -41,34 +58,6 @@ WHAT I AM (Paul) LOOKING FOR IN FURTHER DEVELOPMENT
 * The plots are UGLY ! Let's do something nicer
 * As Iloveclim and Dymends are not in python, prepare some bindings 
 """
-
-### INITIALISATION LIBRAIRIES ######################################################################
-####################################################################################################
-for _ in range(1):
-    """
-    The code is importing some other libraries so that we can use their functions. 
-    """
-    import numpy as np              # Array/Numerical operations
-    import time                     # Time (run speed) printing
-    import matplotlib.pyplot as plt # Plot elements 
-    plt.close('all')                # Remove to 
-    
-    """
-    These libraries are local code fragments we use later
-    """
-    import Parameters as Par      # All the parameters of the system
-    import FunctionsGoodwin as FG # Core of models
-    import plots as plts          # Already written plot functions
-    import Miscfunc as M          # All miscellaneous functions
-
-    ### MATPLOTLIB INTERACTIVITY ####
-    '''
-    Matplotlib allow in-line (in terminal) output or interactive output. Select one here.
-    You can change it in the jupyter (interactive terminal) of your IDE also 
-    %matplotlib # Allow interactive output
-    %matplotlib inline # plot in terminal
-    '''
-    #%matplotlib inline 
 
 print('List of existing set of equations  :')
 for f in [ f for f in dir(FG) if 'f_' in f] : print(f)
