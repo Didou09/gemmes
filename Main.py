@@ -1,6 +1,10 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
+
 #rootfold='/home/ejp/Desktop/Goodwin-Keen/simulations'
-rootfold='D:\\Georgetown\\Simulation-Goodwin\\'
+#rootfold='D:\\Georgetown\\Simulation-Goodwin\\'
+rootfold = os.path.dirname(__file__)
 
 ### WELCOME MESSAGE ################################################################################
 """
