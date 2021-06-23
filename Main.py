@@ -84,6 +84,20 @@ def _str2bool(arg):
         raise argparse.ArgumentTypeError('Boolean value expected!')
 
 
+def _check_inputs(
+    plot=None,
+    rootfold=None,
+):
+
+    if plot is None:
+        plot = _PLOT
+    if rootfold is None:
+        rootfold = _ROOTFOLD
+
+    return plot, rootfold
+
+
+
 # #############################################################################
 # #############################################################################
 #                   Main function
@@ -108,12 +122,24 @@ def run(
 
     """
 
+    # -----------------
+    #  check inputs
+
+    plot, rootfold = _check_inputs(
+        plot=plot,
+        rootfold=rootfold,
+    )
+
+    # -----------------
+    #  go on
+
     print('List of existing set of equations  :')
     for f in [ f for f in dir(FG) if 'f_' in f] : print(f)
     print(3*'\n')
 
-    ### PARAMETERS INITIALISATION #############################################
-    ###########################################################################    
+
+    # -----------------
+    # PARAMETERS INITIALISATION
     """
     This part create 'param' (parameters dic) and 'op' (operators dic) depending of the system size and properties
     Typically, param contains the "default parameters" values and should be open in another windows,
@@ -129,8 +155,8 @@ def run(
     param = M.preparedT(param)         # Determine the best value for dt and associates
     op= []#M.prepareOperators(p)  # Spatial operators initialisation
 
-    ### initial conditions ####################################################
-    ###########################################################################
+    # -----------------
+    # initial conditions
     """
     The initial state vector at t=0 of the system in a "readable" language.
     Depending of the equation set you use, all of them will not necessary be used.
@@ -172,10 +198,10 @@ def run(
     '''
     ic['t']     = 1.*v1           # Year in the simulation 
 
-
     y, param = FG.prepareY(ic, param) ### The vector y containing all the state of a time t.
-    ### Initialisation of data storage ########################################
-    ###########################################################################
+
+    # -----------------
+    # Initialisation of data storage
     """
     This part is very close to the numerical resolution core. No need to delve in it
     It looks "complex" because it allows the record of few timestep only
@@ -187,8 +213,8 @@ def run(
     tprevious    = 0                                   # deltatime between two records
     idx          = 0                                   # index of the current record
 
-    ### Simulation iteration ##################################################
-    ###########################################################################
+    # -----------------
+    # Simulation iteration
     """
     The RK4 core, with partial temporal storage
     """
@@ -239,9 +265,12 @@ def run(
 
     print('done ! elapsed time :', time.time()-tim,'s')
 
-    if param['Save'] : FG.savedata(rootfold, t, Y_s, param, op) # Save the data as a pickle file in a new folder
-    ### Results interpretation ################################################
-    ###########################################################################
+    # Save the data as a pickle file in a new folder
+    if param['Save']:
+        FG.savedata(rootfold, t, Y_s, param, op)
+
+    # ----------------------
+    # Results interpretation
     """
     Now that the simulation is done, we can translate its results in a more readable fashion.
     r is the expansion of Y_s into all the relevant variables we are looking for, stored as a dictionnary.
