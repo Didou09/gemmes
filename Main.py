@@ -221,3 +221,4 @@ plts.PeriodPlots(r,p,op,)          # Study stability-period
 # :-)
 # :-)
 # :-)
+# :-)
