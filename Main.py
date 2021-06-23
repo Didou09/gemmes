@@ -95,19 +95,22 @@ Depending of the equation set you use, all of them will not necessary be used.
 (example, a reduced set will read ic['d'], a complete set will read ic['D']) 
 """
 
-ic = {} # Dictionnary of initial conditions
 v1 = np.ones(param['Nx']) ### Pratical notation for more readable code : an array with 1 everywhere
 
-ic['a']       = 1.*v1            # Initial productivity per worker
-ic['N']       = 1.*v1            # Initial quantity of people
+# Dictionnary of initial conditions
+ic = {
+    'a': 1.*v1,                             # Initial productivity per worker
+    'N': 1.*v1,                             # Initial quantity of people
+    'd': 0*1.53*v1,
+    'omega': 1.*v1*param['omega0'],         #*np.arange(0,1,p['Nx'])
+    'lambda': np.linspace(                  # Distribution of initial lambda
+        param['lambdamin'], param['lambdamax'], param['Nx'],
+    ),
+}
 
-ic['d']       = 0*1.53*v1
-ic['omega']   = 1.*v1*param['omega0']#*np.arange(0,1,p['Nx'])
-ic['lambda']  = np.linspace(param['lambdamin'], param['lambdamax'], param['Nx'])#np.linspace(p['lambdamin'],p['lambdamax'],p['Nx'])    # Distribution of initial lambda
-ic['L']       = ic['omega']*ic['N']
-ic['K']       = ic['a']*ic['L']*param['nu']                                # Beginning at equilibrium
-ic['W']       = param['omega0'] *ic['K']/param['nu']                           # Initial distribution of salary
-
+ic['L'] = ic['omega']*ic['N']
+ic['K'] = ic['a']*ic['L']*param['nu']               # Beginning at equilibrium
+ic['W'] = param['omega0'] *ic['K']/param['nu']      # Initial distribution of salary
 
 '''
 ic['D']     =1.*v1            # Debt   
