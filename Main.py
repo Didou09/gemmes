@@ -70,6 +70,19 @@ def run(
     plot=None,
     rootfold=None,
 ):
+    """ Run the simulation
+
+    Details
+
+    parameters
+    ----------
+    plot:       bool
+        Flag indicating whether to plot figure
+    rootfold:   str
+        Path where to save data
+
+
+    """
 
     print('List of existing set of equations  :')
     for f in [ f for f in dir(FG) if 'f_' in f] : print(f)
@@ -77,21 +90,20 @@ def run(
 
     ### PARAMETERS INITIALISATION #############################################
     ###########################################################################    
-    for _ in range(1):
-        """
-        This part create 'param' (parameters dic) and 'op' (operators dic) depending of the system size and properties
-        Typically, param contains the "default parameters" values and should be open in another windows,
-        I edit them after param initialisation if I want to do some original runs
-        """
+    """
+    This part create 'param' (parameters dic) and 'op' (operators dic) depending of the system size and properties
+    Typically, param contains the "default parameters" values and should be open in another windows,
+    I edit them after param initialisation if I want to do some original runs
+    """
 
-        param = Par.initparams()              # PARAMETERS IN THIS FILE ( PARAMETERS )
+    param = Par.initparams()              # PARAMETERS IN THIS FILE ( PARAMETERS )
 
-        param['lambdamax']  = 1-10**(-2)          # Variation of lambda on the simulation 
+    param['lambdamax']  = 1-10**(-2)          # Variation of lambda on the simulation 
 
-        # The good place to add a loop on certain parameters if you need 
-        param = M.preparePhilips(param)    # Determining Philips curve and Solow point
-        param = M.preparedT(param)         # Determine the best value for dt and associates
-        op= []#M.prepareOperators(p)  # Spatial operators initialisation
+    # The good place to add a loop on certain parameters if you need 
+    param = M.preparePhilips(param)    # Determining Philips curve and Solow point
+    param = M.preparedT(param)         # Determine the best value for dt and associates
+    op= []#M.prepareOperators(p)  # Spatial operators initialisation
 
     ### initial conditions ####################################################
     ###########################################################################
