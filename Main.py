@@ -26,7 +26,7 @@ import plots as plts          # Already written plot functions
 import Miscfunc as M          # All miscellaneous functions
 
 
-_ROOTFOLD = os.path.dirname(__file__)
+_SAVEPATH = os.path.dirname(__file__)
 _PLOT = True
 
 
@@ -86,15 +86,15 @@ def _str2bool(arg):
 
 def _check_inputs(
     plot=None,
-    rootfold=None,
+    savepath=None,
 ):
 
     if plot is None:
         plot = _PLOT
-    if rootfold is None:
-        rootfold = _ROOTFOLD
+    if savepath is None:
+        savepath = _SAVEPATH
 
-    return plot, rootfold
+    return plot, savepath
 
 
 
@@ -106,7 +106,7 @@ def _check_inputs(
 
 def run(
     plot=None,
-    rootfold=None,
+    savepath=None,
 ):
     """ Run the simulation
 
@@ -116,7 +116,7 @@ def run(
     ----------
     plot:       bool
         Flag indicating whether to plot figure
-    rootfold:   str
+    savepath:   str
         Path where to save data
 
 
@@ -125,9 +125,9 @@ def run(
     # -----------------
     #  check inputs
 
-    plot, rootfold = _check_inputs(
+    plot, savepath = _check_inputs(
         plot=plot,
-        rootfold=rootfold,
+        savepath=savepath,
     )
 
     # -----------------
@@ -267,7 +267,7 @@ def run(
 
     # Save the data as a pickle file in a new folder
     if param['Save']:
-        FG.savedata(rootfold, t, Y_s, param, op)
+        FG.savedata(savepath, t, Y_s, param, op)
 
     # ----------------------
     # Results interpretation
@@ -320,11 +320,11 @@ if __name__ ==  '__main__':
         required=False,
     )
     parser.add_argument(
-        '-root',
-        '--rootfold',
+        '-sp',
+        '--savepath',
         type=str,
         help='path where to save data',
-        default=_ROOTFOLD,
+        default=_SAVEPATH,
         required=False,
     )
     kwdargs = dict(parser.parse_args()._get_kwargs())
