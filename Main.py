@@ -5,6 +5,11 @@
 """
 The code is importing some other libraries so that we can use their functions. 
 """
+
+# Standard library
+import os
+
+
 # common
 import time                     # Time (run speed) printing
 import numpy as np              # Array/Numerical operations
@@ -59,6 +64,7 @@ WHAT I AM (Paul) LOOKING FOR IN FURTHER DEVELOPMENT
 * As Iloveclim and Dymends are not in python, prepare some bindings 
 """
 
+
 print('List of existing set of equations  :')
 for f in [ f for f in dir(FG) if 'f_' in f] : print(f)
 print(3*'\n')
@@ -67,18 +73,18 @@ print(3*'\n')
 ####################################################################################################    
 for _ in range(1):
     """
-    This part create 'p' (parameters dic) and 'op' (operators dic) depending of the system size and properties
-    Typically, p contains the "default parameters" values and should be open in another windows, 
-    I edit them after p initialisation if I want to do some original runs 
+    This part create 'param' (parameters dic) and 'op' (operators dic) depending of the system size and properties
+    Typically, param contains the "default parameters" values and should be open in another windows,
+    I edit them after param initialisation if I want to do some original runs
     """
-    
-    p = Par.initparams()              # PARAMETERS IN THIS FILE ( PARAMETERS )
-    
-    p['lambdamax']  = 1-10**(-2)          # Variation of lambda on the simulation 
-    
+
+    param = Par.initparams()              # PARAMETERS IN THIS FILE ( PARAMETERS )
+
+    param['lambdamax']  = 1-10**(-2)          # Variation of lambda on the simulation 
+
     # The good place to add a loop on certain parameters if you need 
-    p = M.preparePhilips(p)    # Determining Philips curve and Solow point
-    p = M.preparedT(p)         # Determine the best value for dt and associates
+    param = M.preparePhilips(param)    # Determining Philips curve and Solow point
+    param = M.preparedT(param)         # Determine the best value for dt and associates
     op= []#M.prepareOperators(p)  # Spatial operators initialisation
 
 ### initial conditions #############################################################################
@@ -89,18 +95,18 @@ Depending of the equation set you use, all of them will not necessary be used.
 (example, a reduced set will read ic['d'], a complete set will read ic['D']) 
 """
 
-ic={} # Dictionnary of initial conditions
-v1 = np.ones(p['Nx']) ### Pratical notation for more readable code : an array with 1 everywhere
+ic = {} # Dictionnary of initial conditions
+v1 = np.ones(param['Nx']) ### Pratical notation for more readable code : an array with 1 everywhere
 
 ic['a']       = 1.*v1            # Initial productivity per worker
 ic['N']       = 1.*v1            # Initial quantity of people
 
-ic['d']       = 0*1.53*v1 
-ic['omega']   = 1.*v1*p['omega0']#*np.arange(0,1,p['Nx'])
-ic['lambda']  = np.linspace(p['lambdamin'],p['lambdamax'],p['Nx'])#np.linspace(p['lambdamin'],p['lambdamax'],p['Nx'])    # Distribution of initial lambda
+ic['d']       = 0*1.53*v1
+ic['omega']   = 1.*v1*param['omega0']#*np.arange(0,1,p['Nx'])
+ic['lambda']  = np.linspace(param['lambdamin'], param['lambdamax'], param['Nx'])#np.linspace(p['lambdamin'],p['lambdamax'],p['Nx'])    # Distribution of initial lambda
 ic['L']       = ic['omega']*ic['N']
-ic['K']       = ic['a']*ic['L']*p['nu']                                # Beginning at equilibrium
-ic['W']       = p['omega0'] *ic['K']/p['nu']                           # Initial distribution of salary
+ic['K']       = ic['a']*ic['L']*param['nu']                                # Beginning at equilibrium
+ic['W']       = param['omega0'] *ic['K']/param['nu']                           # Initial distribution of salary
 
 
 '''
@@ -113,26 +119,26 @@ ic['Pc']    =1.*v1            # Carbon price
 
 ic['Fexo']  =1.*v1            # Exogenous forcing intensity
 ic['Eland'] =2.6*v1           # Emission from land    
-ic['CO2at'] =1.*v1*p['CO2at_ini']           # CO2 in atmosphere
-ic['CO2up'] =1.*v1*p['CO2up_ini']           # CO2 in upper ocean and biosphere
-ic['CO2lo'] =1.*v1*p['CO2lo_ini']          # CO2 in deep ocean
+ic['CO2at'] =1.*v1*param['CO2at_ini']           # CO2 in atmosphere
+ic['CO2up'] =1.*v1*param['CO2up_ini']           # CO2 in upper ocean and biosphere
+ic['CO2lo'] =1.*v1*param['CO2lo_ini']          # CO2 in deep ocean
 ic['T']     =1.*v1           # Atmospheric temperature 
 ic['T0']    =1.*v1           # Deeper ocean temperature 
 '''
 ic['t']     =1.*v1           # Year in the simulation 
 
 
-y,p = FG.prepareY(ic,p) ### The vector y containing all the state of a time t.
+y, param = FG.prepareY(ic, param) ### The vector y containing all the state of a time t.
 ### Initialisation of data storage #################################################################
 ####################################################################################################
 """
 This part is very close to the numerical resolution core. No need to delve in it
 It looks "complex" because it allows the record of few timestep only
 """
-Y_s = np.zeros((p['Nvar'],p['Ns'],p['Nx']))     # stock dynamics
+Y_s = np.zeros((param['Nvar'], param['Ns'], param['Nx']))     # stock dynamics
 Y_s[:,0,:]= 1*y                                 # first stock
 t         = 0
-t_s       = np.zeros(p['Ns'])                   # stock time
+t_s       = np.zeros(param['Ns'])                   # stock time
 tprevious = 0                                   # deltatime between two records
 idx       = 0                                   # index of the current record
 
@@ -146,10 +152,11 @@ print('Simulation...',end='');tim=time.time()
 ### THIS IS THE PART WHERE YOU CAN PUT SOME COMMUNICATION
 # :::C::: LAUNCH THE OTHER PROGRAM
 
-for i in range(p['Nt']-1):
-    y += M.rk4(y,op,p)                       # The vector y is dynamically updated 
-    t += p['dt'];tprevious+= p['dt']          # time is incremented
-    if tprevious >= p['Tstore']:              # if it is time to record the state
+for i in range(param['Nt']-1):
+    y += M.rk4(y, op, param)                       # The vector y is dynamically updated 
+    t += param['dt']
+    tprevious += param['dt']          # time is incremented
+    if tprevious >= param['Tstore']:              # if it is time to record the state
         idx+=1                                # we give it a new index
         Y_s[:,idx,:] = np.copy(y)             # we write it in the "book" Y_s
         t_s[idx]     = t*1                    # we write the time 
@@ -187,7 +194,7 @@ for i in range(p['Nt']-1):
 
 print('done ! elapsed time :', time.time()-tim,'s')        
 
-if p['Save'] : FG.savedata(rootfold,t,Y_s,p,op) # Save the data as a pickle file in a new folder
+if param['Save'] : FG.savedata(rootfold, t, Y_s, param, op) # Save the data as a pickle file in a new folder
 ### Results interpretation #########################################################################
 ####################################################################################################
 """
@@ -196,19 +203,19 @@ r is the expansion of Y_s into all the relevant variables we are looking for, st
 Then, the other parts are simply plots of the result
 """
 
-r = FG.expandY(Y_s,t_s,op,p)  # Result dictionnary 
-r = M.getperiods(r,p,op)      # Period measurements 
+r = FG.expandY(Y_s, t_s, op, param)  # Result dictionnary 
+r = M.getperiods(r, param, op)      # Period measurements 
 
 # GRAPHS, 
-plts.PhilAndInvest(p,)             # Show behavior functions 
-plts.GoodwinKeenTypical(r,p,)      # Typical 3-Dimension phase-plot
-plts.omegalambdacycles(r,p,)       # 2-D omega-lambda phase portrait
-plts.GraphesIntensive(r,p)    
-plts.GraphesExtensive(r,p) 
-#plts.PhasewithG(r,p,op,)           # Phase diagram with growth
-plts.PeriodPlots(r,p,op,)          # Study stability-period
-#plts.map2DLambdaT(r,op,)
-#plts.MesoMeanSTD(r,p,op,)
+plts.PhilAndInvest(param,)             # Show behavior functions 
+plts.GoodwinKeenTypical(r, param,)      # Typical 3-Dimension phase-plot
+plts.omegalambdacycles(r, param,)       # 2-D omega-lambda phase portrait
+plts.GraphesIntensive(r, param)
+plts.GraphesExtensive(r, param)
+#plts.PhasewithG(r, param, op,)           # Phase diagram with growth
+plts.PeriodPlots(r, param, op,)          # Study stability-period
+#plts.map2DLambdaT(r, op,)
+#plts.MesoMeanSTD(r, param, op,)
 # :-)
 # :-)
 # :-)
