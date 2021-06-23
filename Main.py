@@ -3,7 +3,7 @@
 
 
 """
-The code is importing some other libraries so that we can use their functions. 
+The code is importing some other libraries so that we can use their functions.
 """
 
 # Standard library
@@ -24,30 +24,29 @@ import plots as plts          # Already written plot functions
 import Miscfunc as M          # All miscellaneous functions
 
 
-#rootfold='/home/ejp/Desktop/Goodwin-Keen/simulations'
-#rootfold='D:\\Georgetown\\Simulation-Goodwin\\'
-rootfold = os.path.dirname(__file__)
+_ROOTFOLD = os.path.dirname(__file__)
+
 
 ### WELCOME MESSAGE ################################################################################
 """
-GOODWIN-TYPE RESOLUTION ALGORITHM 
+GOODWIN-TYPE RESOLUTION ALGORITHM
 
-This python code has been created to simulate Goodwin-Keen simulations, with all the variants to it. 
+This python code has been created to simulate Goodwin-Keen simulations, with all the variants to it.
 Do not worry about the number of section : the architecture is thought to be user-friendly and coder-friendly
 
-WHAT ARE THE SPECIFICITIES OF THIS CODE ? 
+WHAT ARE THE SPECIFICITIES OF THIS CODE?
 * The algorithm solve p['Nx'] system in parrallel : the idea is that later we will couple the systems altogether ("spatial/network properties").
-* For now, there is no much coupling, but you can use it to test many initial conditions and array of parameters values 
+* For now, there is no much coupling, but you can use it to test many initial conditions and array of parameters values
 * The steps are :
     - Creation of the parameters dictionnary p ( in Parameters.py for initial values)
     - Creation of initial conditions in the dictionnary ic
     - Translation into machine friendly variable y
     - Calculation of all the dynamics variable Y_s (the temporal loop)
-    - Translation into user-friendly result in the dictionnary r 
+    - Translation into user-friendly result in the dictionnary r
     - Additional analysis (period, slow enveloppe mouvement...)
     - Plot of variables and analysis through r
 
-HOW TO IMPLEMENT YOUR TOY-MODEL ? 
+HOW TO IMPLEMENT YOUR TOY-MODEL?
  * Add the parameters in Parameters.py (check if it isn't already, or if the name isn't already taken)
  * Add the temporal component in FG.preparedT for dt selection
  * Add the related quantity in the dictionnary of initial condition ic
@@ -55,13 +54,13 @@ HOW TO IMPLEMENT YOUR TOY-MODEL ?
  * Add the equations in a f_THENAMEOFTHEFUNCTION
  * Add the redevelopment in FG.expand
  * have fun !
- 
-WHAT I AM (Paul) LOOKING FOR IN FURTHER DEVELOPMENT 
+
+WHAT I AM (Paul) LOOKING FOR IN FURTHER DEVELOPMENT
 * Check the functions in FunctionGoodwin, I've done some mistakes in more complex models (typically coping with collapse)
 * Add spatial operators which are non unstable ( I have implicit scheme elsewhere but it's a different kind of resolution, and much more work when you change a model)
 * Have a list of all models existing in this framework (copingwithcollapse, Harmoney, predatory-prey...) and code them
 * The plots are UGLY ! Let's do something nicer
-* As Iloveclim and Dymends are not in python, prepare some bindings 
+* As Iloveclim and Dymends are not in python, prepare some bindings
 """
 
 
@@ -91,8 +90,8 @@ for _ in range(1):
 ####################################################################################################
 """
 The initial state vector at t=0 of the system in a "readable" language.
-Depending of the equation set you use, all of them will not necessary be used. 
-(example, a reduced set will read ic['d'], a complete set will read ic['D']) 
+Depending of the equation set you use, all of them will not necessary be used.
+(example, a reduced set will read ic['d'], a complete set will read ic['D'])
 """
 
 v1 = np.ones(param['Nx']) ### Pratical notation for more readable code : an array with 1 everywhere
@@ -113,7 +112,7 @@ ic['K'] = ic['a']*ic['L']*param['nu']               # Beginning at equilibrium
 ic['W'] = param['omega0'] *ic['K']/param['nu']      # Initial distribution of salary
 
 '''
-ic['D']     =1.*v1            # Debt   
+ic['D']     =1.*v1            # Debt
 ic['sigma'] =1.*v1            # Intensity of emission in production
 ic['P']     =1.*v1            # Global price
 ic['Pbs']   =547.22*v1            # Price Backstop
@@ -121,14 +120,14 @@ ic['Pc']    =1.*v1            # Carbon price
 
 
 ic['Fexo']  =1.*v1            # Exogenous forcing intensity
-ic['Eland'] =2.6*v1           # Emission from land    
+ic['Eland'] =2.6*v1           # Emission from land
 ic['CO2at'] =1.*v1*param['CO2at_ini']           # CO2 in atmosphere
 ic['CO2up'] =1.*v1*param['CO2up_ini']           # CO2 in upper ocean and biosphere
 ic['CO2lo'] =1.*v1*param['CO2lo_ini']          # CO2 in deep ocean
-ic['T']     =1.*v1           # Atmospheric temperature 
-ic['T0']    =1.*v1           # Deeper ocean temperature 
+ic['T']     =1.*v1           # Atmospheric temperature
+ic['T0']    =1.*v1           # Deeper ocean temperature
 '''
-ic['t']     =1.*v1           # Year in the simulation 
+ic['t']     = 1.*v1           # Year in the simulation 
 
 
 y, param = FG.prepareY(ic, param) ### The vector y containing all the state of a time t.
@@ -139,18 +138,18 @@ This part is very close to the numerical resolution core. No need to delve in it
 It looks "complex" because it allows the record of few timestep only
 """
 Y_s = np.zeros((param['Nvar'], param['Ns'], param['Nx']))     # stock dynamics
-Y_s[:,0,:]= 1*y                                 # first stock
-t         = 0
-t_s       = np.zeros(param['Ns'])                   # stock time
-tprevious = 0                                   # deltatime between two records
-idx       = 0                                   # index of the current record
+Y_s[:, 0, :] = 1*y                                 # first stock
+t            = 0
+t_s          = np.zeros(param['Ns'])                   # stock time
+tprevious    = 0                                   # deltatime between two records
+idx          = 0                                   # index of the current record
 
 ### Simulation iteration ############################################################################
 #####################################################################################################
 """
-The RK4 core, with partial temporal storage 
+The RK4 core, with partial temporal storage
 """
-print('Simulation...',end='');tim=time.time()
+print('Simulation...', end=''); tim = time.time()
 
 ### THIS IS THE PART WHERE YOU CAN PUT SOME COMMUNICATION
 # :::C::: LAUNCH THE OTHER PROGRAM
@@ -161,47 +160,47 @@ for i in range(param['Nt']-1):
     tprevious += param['dt']          # time is incremented
     if tprevious >= param['Tstore']:              # if it is time to record the state
         idx+=1                                # we give it a new index
-        Y_s[:,idx,:] = np.copy(y)             # we write it in the "book" Y_s
+        Y_s[:, idx, :] = np.copy(y)             # we write it in the "book" Y_s
         t_s[idx]     = t*1                    # we write the time 
         tprevious=0.                          # we reinitialise time before next record
-        
+
     ### THIS IS THE PART WHERE YOU CAN PUT SOME COMMUNICATION
     """
     :::C::: The elements for communications between programs.
-    
+
     The typical method is to put a value (or a list) in a .txt file, make it read by the other file
-    
-    The important thing : You have to wait one program to finish and write the file for the other one to start
-    Two rough strategies : 
+
+    The important thing: You have to wait one program to finish and write the file for the other one to start
+    Two rough strategies:
         * On each side check the date of last update for each communication 
         * Have a common writing flag with a flag (if value is "A" then it's python, "B" is vensim)
-    
-    The elegant strategies : 
+
+    The elegant strategies:
         * Using a python-Vensim binding with step-by-step Dymends in a big function 
         * Using python to launch some Shell-type code
-    
+
     f = open("demofile2.txt", "w")
     f.write(Content)
     f.close()
-    
+
     f = open("demofile2.txt", "r")
     Content = f.read()
     f.close()
-    
+
     import os.path, time
     print("Last modified: %s" % time.ctime(os.path.getmtime("test.txt")))
     print("Created: %s" % time.ctime(os.path.getctime("test.txt")))
-    
+
     For a better version, this has to be moved into the dynamic function f_
     """
 
-print('done ! elapsed time :', time.time()-tim,'s')        
+print('done ! elapsed time :', time.time()-tim,'s')
 
-if param['Save'] : FG.savedata(rootfold, t, Y_s, param, op) # Save the data as a pickle file in a new folder
+if param['Save'] : FG.savedata(_ROOTFOLD, t, Y_s, param, op) # Save the data as a pickle file in a new folder
 ### Results interpretation #########################################################################
 ####################################################################################################
 """
-Now that the simulation is done, we can translate its results in a more readable fashion. 
+Now that the simulation is done, we can translate its results in a more readable fashion.
 r is the expansion of Y_s into all the relevant variables we are looking for, stored as a dictionnary.
 Then, the other parts are simply plots of the result
 """
@@ -219,9 +218,3 @@ plts.GraphesExtensive(r, param)
 plts.PeriodPlots(r, param, op,)          # Study stability-period
 #plts.map2DLambdaT(r, op,)
 #plts.MesoMeanSTD(r, param, op,)
-# :-)
-# :-)
-# :-)
-# :-)
-# :-)
-# :-)
