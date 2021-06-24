@@ -26,8 +26,9 @@ import plots as plts          # Already written plot functions
 import Miscfunc as M          # All miscellaneous functions
 
 
-_SAVEPATH = os.path.dirname(__file__)
 _PLOT = True
+_SAVE = None
+_SAVEPATH = os.path.dirname(__file__)
 
 
 ### WELCOME MESSAGE ###########################################################
@@ -84,18 +85,46 @@ def _str2bool(arg):
         raise argparse.ArgumentTypeError('Boolean value expected!')
 
 
+def _str2boolNone(arg):
+    if isinstance(arg, bool):
+        return arg
+    elif arg.lower() in ['yes', 'true', 'y', 't', '1']:
+        return True
+    elif arg.lower() in ['no', 'false', 'n', 'f', '0']:
+        return False
+    elif arg.lower() in ['none']:
+        return None
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected!')
+
+
 def _check_inputs(
     plot=None,
+    save=None,
     savepath=None,
 ):
 
+    # plot
     if plot is None:
         plot = _PLOT
+
+    # save
+    c0 = save in [None, True, False]
+    if not c0:
+        msg = (
+            "Arg save must be:\n"
+            + "\t- None: falls back to param['Save']\n"
+            + "\t- True: save data\n"
+            + "\t- False: don't save data\n"
+            + "You provided:\n\t{}".format(save)
+        )
+        raise Exception(msg)
+
+    # savepath
     if savepath is None:
         savepath = _SAVEPATH
 
-    return plot, savepath
-
+    return plot, save, savepath
 
 
 # #############################################################################
@@ -106,6 +135,7 @@ def _check_inputs(
 
 def run(
     plot=None,
+    save=None,
     savepath=None,
 ):
     """ Run the simulation
@@ -125,8 +155,9 @@ def run(
     # -----------------
     #  check inputs
 
-    plot, savepath = _check_inputs(
+    plot, save, savepath = _check_inputs(
         plot=plot,
+        save=save,
         savepath=savepath,
     )
 
@@ -266,6 +297,8 @@ def run(
     print('done ! elapsed time :', time.time()-tim,'s')
 
     # Save the data as a pickle file in a new folder
+    if save is not None:
+        param['Save'] = save
     if param['Save']:
         FG.savedata(savepath, t, Y_s, param, op)
 
@@ -317,6 +350,14 @@ if __name__ ==  '__main__':
         type=_str2bool,
         help='flag indicating whether to plot figures',
         default=_PLOT,
+        required=False,
+    )
+    parser.add_argument(
+        '-s',
+        '--save',
+        type=_str2boolNone,
+        help='flag indicating whether to save data',
+        default=_SAVE,
         required=False,
     )
     parser.add_argument(
