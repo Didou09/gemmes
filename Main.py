@@ -26,6 +26,7 @@ import plots as plts          # Already written plot functions
 import Miscfunc as M          # All miscellaneous functions
 
 
+_PARAMSET = None
 _PLOT = True
 _SAVE = None
 _SAVEPATH = os.path.dirname(__file__)
@@ -98,6 +99,15 @@ def _str2boolNone(arg):
         raise argparse.ArgumentTypeError('Boolean value expected!')
 
 
+def _str2strNone(arg):
+    if arg.lower() == 'none':
+        return None
+    elif isinstance(arg, str):
+        return arg
+    else:
+        raise argparse.ArgumentTypeError('str expected!')
+
+
 def _check_inputs(
     plot=None,
     save=None,
@@ -134,6 +144,7 @@ def _check_inputs(
 
 
 def run(
+    paramset=None,
     plot=None,
     save=None,
     savepath=None,
@@ -177,7 +188,9 @@ def run(
     I edit them after param initialisation if I want to do some original runs
     """
 
-    param = Par.initparams()              # PARAMETERS IN THIS FILE ( PARAMETERS )
+    param = Par.initparams(
+        paramset=paramset, flatten=True,
+    )
 
     param['lambdamax']  = 1-10**(-2)          # Variation of lambda on the simulation 
 
@@ -344,6 +357,15 @@ if __name__ ==  '__main__':
     parser = argparse.ArgumentParser(description=msg)
 
     # Define input arguments                                                                                 
+    parser.add_argument(
+        '-ps',
+        '--paramset',
+        type=_str2strNone,
+        choices=list(Par._DPARAM.keys()),
+        help='flag indicating which set of parameters to choose',
+        default=_PARAMSET,
+        required=False,
+    )
     parser.add_argument(
         '-p',
         '--plot',
