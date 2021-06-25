@@ -27,6 +27,7 @@ import Miscfunc as M          # All miscellaneous functions
 
 
 _PARAMSET = None
+_TIMEIT = True
 _PLOT = True
 _SAVE = None
 _SAVEPATH = os.path.dirname(__file__)
@@ -109,10 +110,14 @@ def _str2strNone(arg):
 
 
 def _check_inputs(
+    timeit=None,
     plot=None,
     save=None,
     savepath=None,
 ):
+    # timeit
+    if timeit is None:
+        timeit = _TIMEIT
 
     # plot
     if plot is None:
@@ -134,7 +139,7 @@ def _check_inputs(
     if savepath is None:
         savepath = _SAVEPATH
 
-    return plot, save, savepath
+    return timeit, plot, save, savepath
 
 
 # #############################################################################
@@ -145,6 +150,7 @@ def _check_inputs(
 
 def run(
     paramset=None,
+    timeit=None,
     plot=None,
     save=None,
     savepath=None,
@@ -166,7 +172,8 @@ def run(
     # -----------------
     #  check inputs
 
-    plot, save, savepath = _check_inputs(
+    timeit, plot, save, savepath = _check_inputs(
+        timeit=timeit,
         plot=plot,
         save=save,
         savepath=savepath,
@@ -262,7 +269,9 @@ def run(
     """
     The RK4 core, with partial temporal storage
     """
-    print('Simulation...', end=''); tim = time.time()
+    print('Simulation...', end='')
+    if time is True:
+        tim = time.time()
 
     ### THIS IS THE PART WHERE YOU CAN PUT SOME COMMUNICATION
     # :::C::: LAUNCH THE OTHER PROGRAM
@@ -306,8 +315,9 @@ def run(
 
         For a better version, this has to be moved into the dynamic function f_
         """
-
-    print('done ! elapsed time :', time.time()-tim,'s')
+    if timeit is True:
+        time_ellapsed = time.time()-tim
+        print('done ! elapsed time :', time_ellapsed,'s')
 
     # Save the data as a pickle file in a new folder
     if save is not None:
@@ -364,6 +374,14 @@ if __name__ ==  '__main__':
         choices=list(Par._DPARAM.keys()),
         help='flag indicating which set of parameters to choose',
         default=_PARAMSET,
+        required=False,
+    )
+    parser.add_argument(
+        '-t',
+        '--timeit',
+        type=_str2bool,
+        help='flag indicating whether to time the computation',
+        default=_TIMEIT,
         required=False,
     )
     parser.add_argument(
